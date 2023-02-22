@@ -1,0 +1,257 @@
+match(n:Person) where n.name="sara" return n.city
+
+select city from Person where name="sara"
+
+
+2 Ways
+1. Multiple matches 
+match (:Person {name:"helen Hunt"})-[:ACTED_IN]-(firstLevelMovies:movie)
+match (firstLevelMovies:movie) -[:ACTED_IN]-(coactors:Person)
+match (coactors:Person)-[:ACTED_IN]-(coactorsmovie:movie)
+return coactorsmovie
+
+
+
+2. One match
+
+match (:Person {name:"helen Hunt"})-[:ACTED_IN]-(:movie)-[:ACTED_IN]-(coactors:Person)-[:ACTED_IN]-(coactorsmovie:movie) return coactorsmovie
+
+
+cartesian prodcut
+
+create (:Employee{name:"johnson"}),(:Employee{name:"jack"}),(:Company{name:"A"}),(:Company{name:"B"}),(:Employee{name:"john"})
+
+match(n:Employee) where n.name starts with "john"
+create (n)-[:WORKS]->(:Company)
+
+
+match(n:Employee),(m:Company) where n.name starts with "john" and m.name is not null
+create (n)-[:WORKS]->(m:Company)
+
+
+Have a lot of depth : Relationship -- varying levels
+
+cyclic graphs
+
+match(n)
+return n
+
+Primary key:
+
+Nodes : default : elementId
+Drawback -- It is not going to be the same ;
+API code based on the elementId -- probability that there may be different results
+
+Best practice in neo4j-  Business primary key
+code search basis of business primary key
+Property -- primary key(unique, not null)
+Constraints -- unique constraint on label Person and property personId;
+2 nodes which have the same personId
+
+
+create (:Person{name:"sraa",city:"Mum",state:null});//give null to property --equivalent to removing the property; state is not added
+
+
+Row with the state property existing and having a value null; // wrong
+Row with the state property not there; // wrong
+
+ Create the nodes
+MATCH (n) DETACH DELETE n;
+
+MERGE (:Movie {title: 'Apollo 13', tmdbId: 568, released: '1995-06-30', imdbRating: 7.6, genres: ['Drama', 'Adventure', 'IMAX']})
+MERGE (:Person {name: 'Tom Hanks', tmdbId: 31, born: '1956-07-09'})
+MERGE (:Person {name: 'Meg Ryan', tmdbId: 5344, born: '1961-11-19'})
+MERGE (:Person {name: 'Danny DeVito', tmdbId: 518, born: '1944-11-17'})
+MERGE (:Person {name: 'Jack Nicholson', tmdbId: 514, born: '1937-04-22'})
+MERGE (:Movie {title: 'Sleepless in Seattle', tmdbId: 858, released: '1993-06-25', imdbRating: 6.8, genres: ['Comedy', 'Drama', 'Romance']})
+MERGE (:Movie {title: 'Hoffa', tmdbId: 10410, released: '1992-12-25', imdbRating: 6.6, genres: ['Crime', 'Drama']})
+
+
+MATCH (apollo:Movie {title: 'Apollo 13'})
+MATCH (tom:Person {name: 'Tom Hanks'})
+MATCH (meg:Person {name: 'Meg Ryan'})
+MATCH (danny:Person {name: 'Danny DeVito'})
+MATCH (sleep:Movie {title: 'Sleepless in Seattle'})
+MATCH (hoffa:Movie {title: 'Hoffa'})
+MATCH (jack:Person {name: 'Jack Nicholson'})
+MERGE (tom)-[:ACTED_IN {role: 'Jim Lovell'}]->(apollo)
+MERGE (tom)-[:ACTED_IN {role: 'Sam Baldwin'}]->(sleep)
+MERGE (meg)-[:ACTED_IN {role: 'Annie Reed'}]->(sleep)
+MERGE (danny)-[:ACTED_IN {role: 'Bobby Ciaro'}]->(hoffa)
+MERGE (danny)-[:DIRECTED]->(hoffa)
+MERGE (jack)-[:ACTED_IN {role: 'Jimmy Hoffa'}]->(hoffa)
+
+
+
+Create a node/relationship :
+1. Create clause
+2. Match and create clause
+3. merge
+
+merge -- mix of match and create
+
+merge(john:Employee{empId:101,empName:"john",salary:678}) 
+merge(emp:Employee{empId:102,empName:"sara",salary:1678}) 
+
+// need not specify the direction
+match(john:Employee),(emp:Employee) where john.empName="john" and emp.empName="sara"
+merge (john)-[:KNOWS]-(emp)
+
+// merge with an existing node -- return that node
+// merge with a new node -- create the node
+
+Avoid duplicates -- merge
+
+// Merge -- on create and on match
+// create a new node if is does not exists
+merge(john:Employee{empId:101,empName:"john",salary:678}) 
+
+
+// create a node if the node does not exists 
+// update the node if it exists
+merge(emp:Employee{empId:103,empName:"jill",salary:678}) 
+on create 
+  set emp.dateOfCreation=timestamp()
+on match 
+  set emp.dateOfModification=timestamp()
+return emp
+
+match(emp1:Employee {empId:102}) merge (emp1)-[:LIKES]-(emp2:Employee {empId:105,empName:"geeta"})
+
+// salary: 1000; On 2023 add field in existing node(row) salaryIn2023=2000
+History of node modifications
+
+match(emp:Employee)
+merge (n:EmpName {name:emp.empName})
+merge (emp)-[:DETAILS]->(n)
+return emp.empId,n.name,emp.salary 
+
+
+1. LMS registration
+
+March 2023 -- 1000
+March 2024 -- 2000 -- relationship CHANGE_2024 b/w 2 nodes : emp emp_history
+March 2025 -- 3000 -- relationship CHANGE_2025 b/w 2 nodes : emp emp_history1
+
+match(emp1:Employee {empId:102}) merge (emp1)-[:LOVES]-(emp2:Employee {empId:105,empName:"geeta"})
+
+MATCH p=()-[r]->()  where type(r) =~ "L.*" RETURN p LIMIT 25
+
+Pattern matching:
+
+starts with j
+match (n) where n.empName starts with "j" return n;
+match (n) where n.empName =~ "j.*" return n;
+
+ends with l
+match (n) where n.empName ends with "l" return n;
+match (n) where n.empName =~ ".*l" return n;
+
+which has "a" in the empName 
+match (n) where n.empName =~ ".*a.*" return n;
+
+match on basis of path:
+match p=()-[:LIKES]-() return p
+
+Find all the actors in movie :Sleepless in Seattle
+
+
+
+match(n:Person)-[:ACTED_IN]-(m:Movie{title:"Sleepless in Seattle"}) return n
+//Venkat
+match(n:Person)-[:ACTED_IN]-(m:Movie) where m.title="Sleepless in Seattle" return n
+
+match(n:Person)-[:ACTED_IN]-(m:Movie where m.title="Sleepless in Seattle") return n
+match(n:Person)-[:ACTED_IN]-(m:Movie) where m.title="Sleepless in Seattle" return n.name
+match (n:Person)-[:ACTED_IN]-(m:Movie) where m.title="Sleepless in Seattle" return n
+
+Find all the actors's name in movie :Sleepless in Seattle
+match(n:Person)-[:ACTED_IN]-(m:Movie where m.title="Sleepless in Seattle") return n.name as Actors
+
+Find all the actors's name and movie title in movie :Sleepless in Seattle
+match(n:Person)-[:ACTED_IN]-(m:Movie where m.title="Sleepless in Seattle") return n.name as Actors,m.title as Title
+
+Find all the actors's name and movie title in movie :Sleepless in Seattle with the actors coming in as a list
+match(n:Person)-[:ACTED_IN]-(m:Movie where m.title="Sleepless in Seattle") return m.title as Title, collect(n.name) as Actors
+ 
+Display the various movie titles in upper case
+match(m:Movie) return count(m)
+match(m:Movie) return toUpper(m.title)
+
+Count of nodes which belong to Movie label
+match(n:Movie) return count(n)
+
+match(n:Employee) return sum(n.salary)
+match(p:Person)-[:DIRECTED]-(:Movie) return p.name as DIRECTOR
+
+Name the persons who are directors
+match (n:Person)-[:DIRECTED]-(m:Movie) return n.name as DIRECTOR
+
+Create a list of directors:
+match (n:Person)-[:DIRECTED]-(m:Movie) return collect(n.name) as DIRECTOR_LIST
+match (n:Person)-[:DIRECTED]-(m:Movie) return collect(n.name)
+match(p:Person)-[:DIRECTED]-(:Movie) return collect(p.name) as DIRECTOR
+
+
+Display the movie name, directors and actors 
+
+match(p:Person)-[:DIRECTED]-(m:Movie) 
+with p,m
+match (q:Person)-[:ACTED_IN]-(m) 
+return m.title as title, collect(q.name) as Actors, collect(DISTINCT p.name) as Directors
+
+match (p:Person)-[:DIRECTED]-(m:Movie) -[:ACTED_IN]-(coActors:Person)
+return m.title,collect(distinct p.name) as Directors, collect(coActors.name) as Actors
+
+
+
+Find the people who are both directors and actors
+match(p:Person)-[:DIRECTED]-(m:Movie) 
+match(q:Person)-[:ACTED_IN]-(m) return m.title, collect(Distinct p.name) as Directors,collect( q.name) as Actors
+
+OR 
+match(p:Person)-[:DIRECTED]-(m:Movie) (q:Person)-[:ACTED_IN]-(m) return m.title, collect(Distinct p.name) as Directors,collect( q.name) as Actors
+
+Multiple matches : Pipeline; Output of the first match becomes the input for the second match
+
+Outer join:
+optional match (p:Person)-[:DIRECTED]-(m:Movie) -[:ACTED_IN]-(coActors:Person)
+return m.title,collect(distinct p.name) as Directors, collect(coActors.name) as Actors
+
+// Will list all movies with their respective actors(if present) and directors(if present)
+optional match (q:Person)-[:ACTED_IN]-(m:Movie) 
+optional match(p:Person)-[:DIRECTED]-(m:Movie) 
+return m.title as title, collect(q.name) as Actors,  collect(distinct p.name) as Directors
+
+
+// Will list movies for which there is a director(mandatory) with their respective actors(mandatory) and directors
+match (q:Person)-[:ACTED_IN]-(m:Movie) 
+match(p:Person)-[:DIRECTED]-(m:Movie) 
+return m.title as title, collect(q.name) as Actors,  collect(distinct p.name) as Directors
+
+// Will list all movies who can have a actor or not but should have a director  with their respective actors and directors
+optional match (q:Person)-[:ACTED_IN]-(m:Movie) 
+match(p:Person)-[:DIRECTED]-(m:Movie) 
+return m.title as title, collect(q.name) as Actors,  collect(distinct p.name) as Directors
+
+// Will list all movies who surely have an actor but the director is optional with their respective actors and directors
+match (q:Person)-[:ACTED_IN]-(m:Movie) 
+optional match(p:Person)-[:DIRECTED]-(m:Movie) 
+return m.title as title, collect(q.name) as Actors,  collect(distinct p.name) as Directors
+
+
+
+Display the actor and list of movies they have acted in
+
+
+
+
+
+
+
+
+
+
+
+
+

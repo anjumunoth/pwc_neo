@@ -1,0 +1,95 @@
+ Why nosql?
+-- Scalability, flexibility
+-- Vertical Scaling, Horizontal Scaling
+-- Vertical scaling -- RDBMS -- increase the cpu/memory of the single server
+	Costly, hardware restriction
+-- Horizontal scaling -- nosql -- add/remove servers at the go; multiple servers -- replication of data
+	-- 	Consume less cost, servers can be of commodity hardwares, High availability
+-- Volume of data (millions and trillions)
+-- Type of data(structured data -- text; unstructured; semi struuctured data(images,audios,videos))
+-- 100 cr of people; text; 13 images; 1300 crores of images; 
+-- Images (BLOB,CLOB)- more space, compression system, retrieval (data --> binary; binary -->data)
+-- NO fixed schema; 2 rows need not have the same schema(columns, number of columns, data type of columns)
+-- Partioning of data /Sharding of data -- Break up the data and store it in different physical servers 
+	-- Distributed across the nodes
+	-- Computation cost is lower;
+	-- Directly make the query go to that partition
+	-- Read/writes will be faster; parallel computation
+	-- Memory required for each partition will be lesser
+-- Sharding of data and  Replication of data -- built it
+-- Index -- faster retrieval of data
+	Pointer
+	Faster access to data
+	Bitmap, B-tree index
+	Single key index; Composite key
+	RDBMS -- text index; 
+	Geo spatial index;
+	Unique indexes
+	Sparse indexes
+
+-- Cloud ;anywhere; anytime; managed implicitly ; pay as u go; nossql -- corresponding cloud version
+-- Need not be ACID compliant; transactions may not be possible
+-- CAP theorem;
+-- BASE; Eventual consistency 
+
+	
+
+
+Bank
+account : custId,custName, address, phoneNumber
+
+account : custId,custName, address, phoneNumber, PAN Number, Aadhaar
+
+Usually Bank app - RDBMS;
+create table -- create a schema; columns; data type of columns; constraints; PK, FK; unique,check,not null
+Schema in RDBMS -- rigid
+Disadv -- rigid schema
+	-- Add columns in an existing table -- challenging
+	-- 
+EmpId, EmpName, Certification(s)
+
+create table (EmpId -- PK; EmpName -- varchar; certifications -- varchar)
+101,Ankit,"Oracle,neo4j"
+
+Normalisation ; 1NF; no multi valued attributes
+Bring it to 1NF
+create table Employee(EmpId ; EmpName -- varchar; certificationId -- varchar; PK --(EmpId,certificationId))
+create table Certification(certificationId --PK varchar;description varchar)
+
+Disadvantages:
+1. Change the schema of tables
+2. Redundancy of data -- updation/deletion/insertion of data (multiple places)
+3. Query: Find empName and their certification desc -- join of 2 tables; expensive op
+
+
+Nosql -- 4 categories
+1. Document based -- Mongodb; Data is stored in json/bson format(object); Each row will be stored as an object
+2. Key value based : Key -- PK; record store it as a value for PK; Redis, Cassandra
+3. Column based : Couchbase ; Partition key and sort key -- make the primary key
+4. Graph based : Network; nodes and links(relationship) between the nodes -- Neo4j
+
+
+Neo 4j-- graph database; ACID compliant
+
+ER diagram
+Entity Relationship
+
+Customer has an account with Bank
+Customer can have multiple accounts
+Customer can take many loans
+
+
+Neo4j -- nodes and relationships
+Not a table structure; Flexible structure
+Entity or node can have properties
+Relationship can alse have some properties
+Node -- row of record
+
+
+ElementId -- Mandatory default unique identifier for each node/relationship; Work likes PK
+
+
+
+
+
+

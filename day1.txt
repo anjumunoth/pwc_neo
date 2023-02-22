@@ -1,0 +1,206 @@
+mahttps://cloud.cdp.rpsconsulting.in/console/#/
+SL NO   Username        Password	Participant Name	
+		
+1       NEO-User01      rps@12345	Prem	
+2       NEO-User02      rps@12345	Shrinivas Rao	
+3       NEO-User03      rps@12345	Jasti Pravallika	
+4       NEO-User04      rps@12345	Vaibhav Raghav	
+5       NEO-User05      rps@12345	Venkata 	
+6       NEO-User06      rps@12345	KuranRao Karri	
+7       NEO-User07      rps@12345	Hemant Dhakad	
+8       NEO-User08      rps@12345	Ankit Srivastava	
+9       NEO-User09      rps@12345	Durga Satya Vasavi Suma Priya	
+10      NEO-User10      rps@12345	Sai Charan Ande	
+11      NEO-User11      rps@12345	Krishna Karthik	
+12      NEO-User12      rps@12345	Kiran TR	
+13      NEO-User13      rps@12345	Bhagirath	
+14      NEO-User14      rps@12345	Niketa LNU
+15			NEO-User17			rps@12345 Sohith Somasani
+Moutushi basu
+
+
+
+Label: pascal case
+Relationship : upper case seperated with hyphen
+identifier:case sensitive
+keywords -- not case sensitive
+node -- ()
+relationship -- []
+properies -- {}
+
+create (n);// create a node
+create (n),(m);// created 2 nodes
+
+create (n:Product);// created a node with label Product
+create (n:Product:Fruit);// creating a node with multiple labels
+
+//create a node with properties only
+create (n {name:"Iphone",cost:5767,quantity:678})
+
+//create a node with properties and label
+create (n:Product {name:"Iphone",cost:5767,quantity:678})
+
+// create and return the entire node
+create (n:Product {name:"Iphone",cost:5767,quantity:678}) return n;
+
+// create and return the node's cost
+create (n:Product {name:"Iphone",cost:5767,quantity:678}) return n.cost;
+
+// create a relationship
+-- 2 nodes; direction; relationship type/label 
+
+Var names -- prod, cust,rel
+
+create (n:Product {name:"Iphone",cost:5767,quantity:678})
+
+
+create (cust:Customer {name:"sara",city:"blr"})
+
+gmatch (prod:Product),(cust:Customer) create (prod)-[rel:BOUGHT]->(cust)
+
+match (prod:Product),(cust:Customer) create (cust)<-[rel:BOUGHT]-(prod)
+
+create (m),(n)
+
+create ()-[rel:BOUGHT]->();// create the nodes and the relationship
+
+// 5 nodes and each node have the label Product
+create (n:Product {name:"Iphone",cost:5767,quantity:678}), (m: Product {name:"LG",cost:5007,quantity:5}), (o: Product {name:"IQOO",cost:51107,quantity:5}), (p: Product {name:"NOKIA",cost:107,quantity:5}), (q: Product {name:"REALME",cost:507,quantity:5})
+
+Table -- Label
+Row -- Node
+                                                                          
+// create 5 customer
+create (cust:Customer {name:"lara",city:"blr"}),(cust1:Customer {name:"tara",city:"blr"}),(cust2:Customer {name:"ram",city:"chn"}),(cust3:Customer {name:"shyam",city:"chn"}),(cust4:Customer {name:"sita",city:"mum"})
+
+// create the relationship b/w customers and product
+
+create (cust:Customer {name:"gita",city:"blr"})<-[:BOUGHT]-(prod:Product{name:"Opp0",cost:15767,quantity:78})
+
+// non optimised
+match (n),(m) where n.name="tara" and m.name="LG"  create (n)<-[:BOUGHT]-(m)
+
+// optimised query; lesser number of searches
+match (n:Customer),(m:Product) where n.name="ram" and m.name="LG"  create (n)<-[:BOUGHT]-(m)
+
+match(prod:product),(cust:customer) where prod.name="Samsung" and cust.custname="Venkat" create(cust)-[rel:BOUGHT]->(prod)
+// expected -- 1 relationship; actual 1 relationship
+
+
+cartesian product
+let emp(5),dept(7);
+select * emp,dept;// cartesian product of all the rescords from emp and dept
+// result set - 5 records
+
+create(cust:Customer{name:"Venkat"})-[rel:BOUGHT]->(prod:Product {name="Samsung"})
+
+create(cust:Customer{name:"Venka"})-[rel:BOUGHT]->(prod:Product {name="Samsung"})
+// create the node and relationship
+
+create(cust:Customer)-[rel:BOUGHT]->(prod:Product)
+7 customer and 5 product; 35 relationship
+
+match(cust:Customer); // getting a warning and not an error
+1. Match can yield a node
+2. Match cannot return any node
+
+match and create
+results of match will go to create
+match returning me nodes; create the relationship based on nodes
+
+create (n)-[r:CHECK]->(m)
+Create 2 nodes and one relationship
+
+create ()-[r:CHECK]->()
+//Create 2 nodes and one relationship
+
+match (m),(n) where m.name="Guava" create (m)-[:CHECK]->(n)
+
+create : create the entire path if a partial of it is not present
+match and create : matched nodes will be used for creation
+
+Creation of a relationship with properties
+match(a:Customer),(b:Product) where a.name="Customer" and b.name="Samsung" create (a)-[rel:BOUGHT{quantityPurchased:4}]->(b) return rel.quantityPurchased,type(rel)
+
+Match:
+Match(n) return n; // All nodes with their respective labels(if present); all the nodes
+
+Match(n:Customer) return n;// entire nodes of Customer label will be returned
+
+//Project some properties
+Match(n:Customer) return n.name,n.city;// entire nodes of Customer label will be returned
+
+Match(n:Customer) where n.city ="blr" return n;// entire nodes of Customer label will be returned where city="blr"
+
+match (n:Customer {city:"blr"}) return n;
+
+match (n:Customer {city:"blr"})--(m) return m;// All the blr customers who have a relationship with other node
+
+match (n:Customer {city:"blr"})--(m:Product) return m;// All the blr customers who have a relationship with other node of type Product
+match (:Customer {city:"blr"})--(m:Product) return m;
+match (:Customer {city:"blr"})--(m) return m;// Non optimised query
+match (n:Customer {city:"blr"})-[]-(m) return m;// All the blr customers who have a relationship with other node
+
+Based on return:
+No var in the match clause, then cannot return it;
+
+int i=10;
+console.log(i);
+console.log(int);// error
+
+Print all the names of products and customers
+match (n:Product|Customer)  return n.name;
+// or operator
+
+match (n:Product|Customer)  return n.name ="Samsung" | n.name="Venkat";
+match (n:Product|Customer)  where n.cost >=100 | n.city="sita" return n;// only nodes
+
+match (n:Product|Customer)  where n.cost >=100 | n.city="sita" return n,n.city;
+// only nodes, customer nodes: city; product nodes: no field with city(will return null)
+
+
+match (n:Customer)-[rel]-(m:Product) return rel;
+//relationship id, type, properties(if any), start node, end node
+
+// Get all the nodes(Product,Customer) which have a Bought relationship
+match (n:Customer)-[rel:BOUGHT]-(m:Product) return rel;
+match (n:Customer)-[rel]-(m:Product) where type(rel)="BOUGHT" return rel;
+
+match (n:Customer)-[rel]-(m:Product) where type(rel)="BOUGHT" return n,m;
+
+
+Create a relationship LIKES between sita(existing node) and samsung(existing)
+match (n:Customer),(m:Product) where n.name='Sita' and m.name='Samsung' create (n)- [rel:LIKES]->(m) ;
+//create (cust:Customer {name:"sita"})-[:LIKES]->(prod:Product{name:"Samsung"})
+//create (cust:Customer {name:"sita"})-[:LIKES]-(prod:Product{name:"Samsung"})
+
+int i=10;
+i=10;
+// cartesian product
+Create with a path ; even if a partial path is not present; it will create the entire path (nodes and relationship)
+
+match (n:Customer),(m:Product) where n.name='sita' and m.name='Samsung' create (n)-[rel:ADDEDTOCART]->(m) ;
+
+match (n:Customer),(m:Product) where n.name='sita' and m.name='Samsung' create (n)- [rel:ADDEDTOCART {quantitySelected:2}]->(m) ;
+
+match (n:Customer),(m:Product) where n.name='sita' and m.name='Samsung' create (n)-[rel:ADDTOWISHLIST]->(m) ;//yes
+match (n:Customer),(m:Product) where n.name='sita' and m.name='Samsung' create (n)-[rel:ADDTOWISHLIST]->(m) ;// no same relationship type
+match (n:Customer),(m:Product) where n.name='sita' and m.name='Samsung' create (n)-[rel:ADDTOWISHLIST{quantitySelected:2}]->(m) ;// yes same relationship type but different properties
+match (n:Customer),(m:Product) where n.name='sita' and m.name='Samsung' create (n)-[rel:ADDTOWISHLIST{category:"phone"}]->(m) ;// yes same relationship type but different properties
+match (n:Customer),(m:Product) where n.name='sita' and m.name='Samsung' create (n)-[rel:ADDTOWISHLIST{quantitySelected:4}]->(m) ;// yes/no same relationship type but different properties
+
+Relationship b/w 2 nodes a and b
+1. Can have 1 relationship with 2 nodes
+2. Can have multiple realtionship b/w a and b : YES 
+provided
+	a. relationship type should be different
+  b. Even if relationship type is same, the properties(key or value) should be different
+  
+
+
+
+
+
+
+
+

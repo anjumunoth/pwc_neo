@@ -1,0 +1,324 @@
+ Create the nodes
+MATCH (n) DETACH DELETE n;
+
+MERGE (:Movie {title: 'Apollo 13', tmdbId: 568, released: '1995-06-30', imdbRating: 7.6, genres: ['Drama', 'Adventure', 'IMAX']})
+MERGE (:Person {name: 'Tom Hanks', tmdbId: 31, born: '1956-07-09'})
+MERGE (:Person {name: 'Meg Ryan', tmdbId: 5344, born: '1961-11-19'})
+MERGE (:Person {name: 'Danny DeVito', tmdbId: 518, born: '1944-11-17'})
+MERGE (:Person {name: 'Jack Nicholson', tmdbId: 514, born: '1937-04-22'})
+MERGE (:Movie {title: 'Sleepless in Seattle', tmdbId: 858, released: '1993-06-25', imdbRating: 6.8, genres: ['Comedy', 'Drama', 'Romance']})
+MERGE (:Movie {title: 'Hoffa', tmdbId: 10410, released: '1992-12-25', imdbRating: 6.6, genres: ['Crime', 'Drama']})
+
+
+MATCH (apollo:Movie {title: 'Apollo 13'})
+MATCH (tom:Person {name: 'Tom Hanks'})
+MATCH (meg:Person {name: 'Meg Ryan'})
+MATCH (danny:Person {name: 'Danny DeVito'})
+MATCH (sleep:Movie {title: 'Sleepless in Seattle'})
+MATCH (hoffa:Movie {title: 'Hoffa'})
+MATCH (jack:Person {name: 'Jack Nicholson'})
+MERGE (tom)-[:ACTED_IN {role: 'Jim Lovell'}]->(apollo)
+MERGE (tom)-[:ACTED_IN {role: 'Sam Baldwin'}]->(sleep)
+MERGE (meg)-[:ACTED_IN {role: 'Annie Reed'}]->(sleep)
+MERGE (danny)-[:ACTED_IN {role: 'Bobby Ciaro'}]->(hoffa)
+MERGE (danny)-[:DIRECTED]->(hoffa)
+MERGE (jack)-[:ACTED_IN {role: 'Jimmy Hoffa'}]->(hoffa)
+
+
+
+Create a node/relationship :
+1. Create clause
+2. Match and create clause
+3. merge
+
+merge -- mix of match and create
+
+merge(john:Employee{empId:101,empName:"john",salary:678}) 
+merge(emp:Employee{empId:102,empName:"sara",salary:1678}) 
+
+// need not specify the direction
+match(john:Employee),(emp:Employee) where john.empName="john" and emp.empName="sara"
+merge (john)-[:KNOWS]-(emp)
+
+// merge with an existing node -- return that node
+// merge with a new node -- create the node
+
+Avoid duplicates -- merge
+
+// Merge -- on create and on match
+// create a new node if is does not exists
+merge(john:Employee{empId:101,empName:"john",salary:678}) 
+
+
+// create a node if the node does not exists 
+// update the node if it exists
+merge(emp:Employee{empId:103,empName:"jill",salary:678}) 
+on create 
+  set emp.dateOfCreation=timestamp()
+on match 
+  set emp.dateOfModification=timestamp()
+return emp
+
+match(emp1:Employee {empId:102}) merge (emp1)-[:LIKES]-(emp2:Employee {empId:105,empName:"geeta"})
+
+// salary: 1000; On 2023 add field in existing node(row) salaryIn2023=2000
+History of node modifications
+
+match(emp:Employee)
+merge (n:EmpName {name:emp.empName})
+merge (emp)-[:DETAILS]->(n)
+return emp.empId,n.name,emp.salary 
+
+
+1. LMS registration
+
+March 2023 -- 1000
+March 2024 -- 2000 -- relationship CHANGE_2024 b/w 2 nodes : emp emp_history
+March 2025 -- 3000 -- relationship CHANGE_2025 b/w 2 nodes : emp emp_history1
+
+match(emp1:Employee {empId:102}) merge (emp1)-[:LOVES]-(emp2:Employee {empId:105,empName:"geeta"})
+
+MATCH p=()-[r]->()  where type(r) =~ "L.*" RETURN p LIMIT 25
+
+Pattern matching:
+
+starts with j
+match (n) where n.empName starts with "j" return n;
+match (n) where n.empName =~ "j.*" return n;
+
+ends with l
+match (n) where n.empName ends with "l" return n;
+match (n) where n.empName =~ ".*l" return n;
+
+which has "a" in the empName 
+match (n) where n.empName =~ ".*a.*" return n;
+
+match on basis of path:
+match p=()-[:LIKES]-() return p
+
+Find all the actors in movie :Sleepless in Seattle
+
+
+
+match(n:Person)-[:ACTED_IN]-(m:Movie{title:"Sleepless in Seattle"}) return n
+//Venkat
+match(n:Person)-[:ACTED_IN]-(m:Movie) where m.title="Sleepless in Seattle" return n
+
+match(n:Person)-[:ACTED_IN]-(m:Movie where m.title="Sleepless in Seattle") return n
+match(n:Person)-[:ACTED_IN]-(m:Movie) where m.title="Sleepless in Seattle" return n.name
+match (n:Person)-[:ACTED_IN]-(m:Movie) where m.title="Sleepless in Seattle" return n
+
+Find all the actors's name in movie :Sleepless in Seattle
+match(n:Person)-[:ACTED_IN]-(m:Movie where m.title="Sleepless in Seattle") return n.name as Actors
+
+Find all the actors's name and movie title in movie :Sleepless in Seattle
+match(n:Person)-[:ACTED_IN]-(m:Movie where m.title="Sleepless in Seattle") return n.name as Actors,m.title as Title
+
+Find all the actors's name and movie title in movie :Sleepless in Seattle with the actors coming in as a list
+match(n:Person)-[:ACTED_IN]-(m:Movie where m.title="Sleepless in Seattle") return m.title as Title, collect(n.name) as Actors
+ 
+Display the various movie titles in upper case
+match(m:Movie) return count(m)
+match(m:Movie) return toUpper(m.title)
+
+Count of nodes which belong to Movie label
+match(n:Movie) return count(n)
+
+match(n:Employee) return sum(n.salary)
+match(p:Person)-[:DIRECTED]-(:Movie) return p.name as DIRECTOR
+
+Name the persons who are directors
+match (n:Person)-[:DIRECTED]-(m:Movie) return n.name as DIRECTOR
+
+Create a list of directors:
+match (n:Person)-[:DIRECTED]-(m:Movie) return collect(n.name) as DIRECTOR_LIST
+match (n:Person)-[:DIRECTED]-(m:Movie) return collect(n.name)
+match(p:Person)-[:DIRECTED]-(:Movie) return collect(p.name) as DIRECTOR
+
+
+Display the movie name, directors and actors 
+
+match(p:Person)-[rel]-(m:Movie) return m.title as title,type(rel) as typ, collect(p.name) 
+
+
+
+Display the actor and list of movies they have acted in
+
+match (p:Person)-[:ACTED_IN]-(m:Movie) 
+return  p.name as Actors,collect(m.title) as title 
+
+What is the role played by a person in a movie
+match (p:Person)-[rel]-(m:Movie) 
+return  p.name as Actors,collect(rel.role) as role, m.title 
+
+Sort the actors by age in a particular movie
+Order by clause -- associalted with a "with" or "return"
+match (p:Person)-[rel]-(m:Movie) where m.title="Sleepless in Seattle"
+return p.name, p.born order by p.born descg
+
+List all the relationship types at the dbms level
+MATCH p=()-[r]->() RETURN distinct type(r) LIMIT 25
+
+MATCH p=()-[r]->() RETURN  relationships(p) LIMIT 25
+
+List all the persons who have acted in genre "drama"
+
+match (p:Person)-[rel:ACTED_IN]-(m:Movie) 
+where "Drama" in m.genres
+return  p.name as Actors,collect(rel.role) as role, m.title , p.born,m.genres
+
+contains
+
+Highest rating among all the movies
+//Apollo 13
+match (n:Movie)
+return n.imdbRating order by n.imdbRating desc limit 1
+match (q:Movie) return q.title order by q.imdbRating desc limit 1
+match (m:Movie) return max( m.imdbRating)
+
+Highest rating for a particular year 1992: starts with
+match(m:Movie)
+where m.released starts with "1995"
+return substring(m.released,0, 4),m.title,max(m.imdbRating)
+
+MERGE (:Movie {title: 'Apollo 12', tmdbId: 568, released: '1995-06-30', imdbRating: 8.6, genres: ['Drama', 'Adventure', 'IMAX']})
+MERGE (:Movie {title: 'Apollo 13', tmdbId: 568, released: '1995-06-30', imdbRating: 7.6, genres: ['Drama', 'Adventure', 'IMAX']})
+
+
+Highest rating year wise
+
+With use cases
+
+Display Tom's details only if he has acted in more than 1 movie
+
+MATCH (tom:Person {name: 'Tom Hanks'})-[:ACTED_IN]-(m:Movie)
+with count(*) as numberOfMovies
+where numberOfMovies >1
+return numberOfMovies
+MERGE (:Movie {title: 'Apollo 10', tmdbId: 568, released: '1995-06-30', imdbRating: 8.6, genres: ['Drama', 'Adventure', 'IMAX']})
+
+Display actors only if they has acted in more than 1 movie
+MATCH (p:Person)-[:ACTED_IN]-(m:Movie)
+with count(*) as numberOfMovies,p
+where numberOfMovies >0
+return p.name,numberOfMovies
+
+MATCH (p:Person)-[:ACTED_IN]-(m:Movie)
+with p,count(*) as numberOfMovies
+where numberOfMovies >0
+return p.name,numberOfMovies
+
+match(m:Movie)
+with substring(m.released,0, 4) as year,max(m.imdbRating) as maximdbRating
+match(n:Movie)
+where substring(n.released,0, 4)=year and n.imdbRating=maximdbRating
+return substring(n.released,0, 4), n.title, n.imdbRating
+
+
+Sort and limit the results before returning
+
+match (actors:Person)--(movie)
+with movie
+order by movie.imdbRating desc
+limit 1
+match (movie) --(user)
+return  movie,collect(user.reviews)
+
+// Sort the movies according to the title in desc
+match (n:Movie)
+with n
+order by n.title
+return collect(n.title) 
+
+match (n:Movie)
+with n
+limit 3
+where n.title starts with "A"
+return collect(n.title) 
+
+match (n:Movie)
+where n.title starts with "A"
+with n,"13" as checkCriteria
+where n.title ends with checkCriteria
+return collect(n.title) 
+
+unwind [10,20,30] as item
+return item*item
+
+unwind[10,3,4,3] as item
+with distinct item
+return item*item
+
+// genres is an array
+For all the movies put together, get the distinct genres they belong to
+match(movie:Movie)
+unwind movie.genres as item
+with distinct item
+return item
+
+// GEt movies under each genre
+
+match(movie:Movie)
+unwind movie.genres as item
+with distinct item
+match(m:Movie)
+where item in m.genres
+return item,collect(m.title)
+
+// Updation of a node
+
+//Replace a node
+match(m:Movie where m.title =~ ".*10")
+set m={title:"New Title"}
+return m
+
+//Update a node with new properties
+match(m:Movie where m.title =~ "N.*")
+set m+={rating:"10"}
+return m
+
+match(m:Movie where m.title =~ "N.*")
+set m+={numberOfActors:"15",title:"Apollo"}
+return m
+
+// Add a new property to an existing node:
+match(m:Movie where m.title =~ ".*10")
+set m.starRating="4"
+
+// Update an existing property in an existing node:
+match(m:Movie where m.title =~ ".*10")
+set m.starRating="10"
+
+// Remove a property in an existing node
+match(m:Movie where m.title =~ ".*10")
+set m.starRating=null
+
+// Conditional setting
+match(m:Movie where m.title =~ ".*10")
+set (case when m.imdbRating>8 then m end).starRating="5"
+retrun m;
+
+// Updation of a property(node/relationship)
+// replace the property
+// remove a property
+// remove a node
+// remove a relationship
+
+//{title:"NewTitle",rating:5}
+match(m:Movie where m.title =~ "N.*")
+set m={numberOfActors:"15",title:"Apollo"}
+return m
+//{numberOfActors:"15",title:"Apollo"}
+
+//{title:"NewTitle",rating:5}
+match(m:Movie where m.title =~ "N.*")
+set m+={numberOfActors:"15",title:"Apollo"}
+return m
+//{numberOfActors:"15",title:"Apollo",rating:5}
+
+
+
+
+
+
+

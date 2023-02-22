@@ -1,0 +1,346 @@
+Create :Product, :Store, :Time , :Client, :ItemsPurchased
+Create :BOUGHT, :PAYMENT, :PLACEDORDER, :FROMSTORE
+
+Get the statewise sales of product
+Get the client's statewise
+Get the orders frequently ordered by a client
+Get quantity of products sold in a particular timeframe
+
+:Product
+Properties:
+Product Key/product number (Unique constraint)
+Name,desc,size,distributor,category, dept info
+
+:ItemsPurchased:
+orderId,amount,storeDetails:[{}],orderDate, productDetails :[{productId, quantity,price}]
+
+:PLACEORDER
+Nodes: Client,Items
+Properties
+
+:FROMSTORE
+Nodes : :Product,:Store
+Properties:
+Items:Array of map{dateOfPurchase,clientId,amount}
+
+:BOUGHT
+Nodes : :Product,:Client
+Properties:
+//store key/number: if present 
+//client key/number
+//Items:Array of map{orderId, quantity,price,storeDetails:[{}],orderDate}
+
+
+Client has purchased for what amount
+:PAYMENT
+amount
+
+
+Sara has bought a,b,c
+
+match (p:Product)-[rel:BOUGHT]-(:Client)
+unwind rel.items as individualItem
+where substring(individualItem.orderDate,4,2)=1
+return p.productId,sum(p.quantity)
+
+
+product -> client
+product -> store
+
+Each Facts's FK -- Relationship; wih properties {other data as part of the fact}
+
+Dimension -- Node labels
+
+
+
+get store details for a particular orderid of a particular client
+1. use existing relationship
+
+2. new realtionship
+
+5 labels ;add :Sales (entire fact data)
+
+4 types of Relationships b/w 5 labels
+
+
+
+source to destination
+start time ; end time
+shortest path
+history of travel :[]
+
+
+same 2 nodes -- can there be multiple relationships
+:Person
+Properties:
+ Id,name
+
+:Place
+PlaceId,name
+
+:Trip
+:personId
+Relationships:
+1.
+:START_TRIP
+Properties: start time ,start date
+2. 
+:STOPS
+Properties: personId
+
+
+
+
+chennai -CANTRAVEL-mumbai
+chennai -CANTRAVEL-hyderabad
+chennai -CANTRAVEL-lucknow
+chennai -CANTRAVEL-pune
+chennai -CANTRAVEL-delhi
+chennai -CANTRAVEL - jammu
+
+mumbai -CANTRAVEL-delhi
+pune -CANTRAVEL-delhi
+
+
+:Person- 
+Place - STOPS - Place
+
+
+
+
+(:Place)-[:TRAVEL]-(:Place)
+
+
+// Updation of a node
+
+//Replace a node's properties
+match(m:Movie where m.title =~ ".*10")
+set m={title:"New Title"}
+return m
+
+//Update a node with new properties
+match(m:Movie where m.title =~ "N.*")
+set m+={rating:"10"}
+return m
+
+match(m:Movie where m.title =~ "N.*")
+set m+={numberOfActors:"15",title:"Apollo"}
+return m
+
+// Add a new property to an existing node:
+match(m:Movie where m.title =~ ".*10")
+set m.starRating="4"
+
+// Update an existing property in an existing node:
+match(m:Movie where m.title =~ ".*10")
+set m.starRating="10"
+
+// Remove a property in an existing node
+match(m:Movie where m.title =~ ".*10")
+set m.starRating=null
+
+// Conditional setting
+match(m:Movie where m.title =~ ".*10")
+set (case when m.imdbRating>8 then m end).starRating="5"
+retrun m;
+
+// add some labels to an existing node
+match (n:Person)
+where n.name=~ "Tom.*"
+set n:Actor
+// After the updations labels for the above node :  Person and Actor
+
+match (n:Person)
+where n.name=~ "Danny.*"
+set n:Actor:Director
+
+
+// remove some labels 
+match (n:Person)
+where n.name=~ "Danny.*"
+remove n:Director
+
+
+// Updation of a property(relationship)
+// Add year property to all relationship
+match (n)-[rel]-(m)
+set rel.year=2023
+return rel;
+
+// Add year property to directed relationship
+match (n)-[rel:DIRECTED]-(m)
+set rel.year=2023,rel.shootingYear=2020
+return rel;
+
+// pass a map to  set the property  of relationship
+match (n:Person where n.name starts with "Dann")-[rel:DIRECTED]-(m)
+set rel={year:2020}
+return rel;
+
+match (n:Person where n.name starts with "Dann")-[rel:DIRECTED]-(m)
+set rel+={shootingYear:2019}
+return rel;
+
+Can the elementId of a node be changed -- No
+Can the type of relationship be changed -- No
+Can the start and end node of a relationship be changed -- NO
+
+// Add a new property elementId
+match (n:Person where n.name starts with "Dann")
+set elementId="4:e539b7ca-4654-43b3-a3e8-ed64b5e2d2c3:100"
+return n;
+
+// add a new type property type
+match (n:Person where n.name starts with "Dann")-[rel:DIRECTED]-(m)
+set rel.type="CODIRECTED"
+return rel;
+
+Status -- mutable value
+Designing the database
+Node or Property(Node/relationship) or relationship
+Relationship -- NO ; 
+	-- Status always associated to a process
+  -- Two nodes; Example -- one node
+Node -- row of information; :Process
+Property -- field of a row
+Status -- property {status:Start/Running/End/Ready}
+
+Design of database
+-- Type of application
+-- Type of data
+-- Various queries
+
+Neo4j:
+1. Analyse the queries coming to the application
+Based on the maximum queries and queries for which performance is required
+2. Identity node labels, relationships, their respective properties
+3. Populate the data
+4. Excecute the queries -- challenges(profiler, execution plan)
+5. If challenges, refactor the schema()
+
+RDBMS
+	1. Info gathering
+  2. Create the schema/ER/table structure
+  3. Populate the data/ execute the queries
+  4. 
+
+  CREATE INDEX node_range_index_name FOR (n:Person) ON (n.name)
+
+1. Add a new node with a duplicate value for name belonging to Person index --yes
+
+2. For which queries is the range index "node_range_index_name" used
+match (n) return n; // Lookup index
+match (n:Person) return n; //Lookup index
+match (n:Movie) return n.name;;//Lookup index
+match (n:Person) return n.name;//Lookup index and range index
+match (n:Person where n.name =~ "Tom.*") return n;//Lookup index and range index
+
+Create a composite index
+CREATE INDEX node_range_index_composite_name_tmdbId FOR (n:Person) ON (n.name,n.tmdbId)
+
+profile match (n:Person where n.name =~ "Tom.*") return n;//Lookup index and Single on name
+profile match (n:Person where n.tmdbId =31) return n;//Lookup index
+profile match (n:Person where n.name =~ "Tom.*" and n.tmdbId =31) return n;// Composite
+
+
+Create a text index 
+CREATE TEXT INDEX node_index_nickname FOR (n:Person) ON (n.name)
+
+profile match (n:Person where n.name =~ "Tom.*") return n;// Range index
+
+profile match(n:Person) where n.name ends with "s" return n.name;// Text search
+
+Range index on :Person(name) : maximum 4 entries
+
+Text index on :Person(name) : minimum 4 entries; maximum n ;n>4; n=8 
+
+Apache Lucene -- indexing and searching library
+
+call db.index.fulltext.queryNodes("node_index_fulltext_name","Ryan") yield node,score return node.name,score
+
+
+
+Full Text index:
+Create on multiple fields
+
+CREATE FULLTEXT INDEX node_index_fulltext_name FOR (n:Person) ON Each [n.name]
+
+CREATE FULLTEXT INDEX node_index_fulltext_name_title FOR (n:Person|Movie) ON Each [n.name,n.title]
+call db.index.fulltext.queryNodes("node_index_fulltext_name_title","tom's") yield node,score return node.name,score
+
+//prefix searching
+
+Can i create unique index explicitly -- NO
+Can a dbms unique indexes -- YES
+Unique indexes are implicitly created when ???? 
+
+Constraints:
+1. Unique node property constraint
+2. Node property existence constraint (Enterprise)
+3. Relationship property existence constraint (Enterprise)
+4. Node key constraint (Enterprise) -- Properties :Unique and not null; Can be a single property or multiple properties
+
+Constraint -- single property or multiple properties
+Constraint and index
+Unique or node key -- Implicitly create a unique index  with the same label name and properties
+Existence constraint (node or relationship) -- normal range index will be created
+
+Label -- Multiple constraints, constraint of different types
+
+create constraint constraint_title for (n:Movie) require n.title is unique
+
+On creating a constraint on existing data with duplicates
+// will thrown an error if there are duplicates
+create constraint constraint_person_unique for (n:Person) require n.name is unique
+
+Create a existence constraint property
+create constraint constraint_person_existence_name for (n:Person) require n.name is not null
+
+create constraint constraint_person_existence_role for (n:Person)-[rel:ACTED_IN]-(:Movie) require rel.role is not null
+
+create the node key constraint -- business PK
+create constraint constraint_movie_node_key for (n:Actor) require n.name is key
+
+
+
+// replace the property
+// remove a property
+// remove a node
+// remove a relationship
+
+//{title:"NewTitle",rating:5}
+match(m:Movie where m.title =~ "N.*")
+set m={numberOfActors:"15",title:"Apollo"}
+return m
+//{numberOfActors:"15",title:"Apollo"}
+
+//{title:"NewTitle",rating:5}
+match(m:Movie where m.title =~ "N.*")
+set m+={numberOfActors:"15",title:"Apollo"}
+return m
+//{numberOfActors:"15",title:"Apollo",rating:5}
+LOAD CSV FROM file:///products.csv AS line
+CREATE (:Products {productId: line[1],productName:line[2], price: toInteger(line[3])})
+
+
+
+LOAD CSV FROM 'file:///products.csv' AS line CREATE (:Products {productId:line[1],productName:line[2], price:toInteger(line[3])})
+
+LOAD CSV with headers FROM 'file:///orders.csv' AS line CREATE (:Orders {oId:line.orderID,orderDate:line.orderDate})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
